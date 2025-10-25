@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
+import { createTask } from '../services/TaskService';
+import { BiLoader, BiLoaderAlt } from 'react-icons/bi';
+import toast from 'react-hot-toast';
 
-const TaskAddForm = () => {
+const TaskAddForm = ({ onTaskAdded }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -10,6 +13,8 @@ const TaskAddForm = () => {
     title: "",
     description: "",
   });
+
+  const [addingTask, setAddingTask] = useState(false);
 
   const validateForm = () => {
     let validForm = true;
@@ -28,18 +33,28 @@ const TaskAddForm = () => {
     return validForm;
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const newTask = {
-        title: formData.title,
-        description: formData.description,
-        status: "In Progress"
-    };
+    try {
+        setAddingTask(true);
 
-    console.log("Form data: ", newTask);
-    setFormData({ title: "", description: "" });
-    setErrors({ title: "", description: "" });
+        const newTask = await createTask(formData);
+
+        if (newTask) {
+            toast.success("Task added successfully!")
+            console.log("Form data: ", newTask);
+            onTaskAdded();
+            setFormData({ title: "", description: "" });
+            setErrors({ title: "", description: "" });
+        } else {
+            console.log("Error saving task");
+        }
+    } catch (error) {
+        console.error("Failed to save task: ", error);
+    } finally {
+        setAddingTask(false);
+    }
   }
 
   const handleInputChange = (e) => {
@@ -52,9 +67,9 @@ const TaskAddForm = () => {
   }
 
   return (
-    <div className='flex-1 bg-slate-100 p-5 rounded-md'>
+    <div className='flex-1 bg-slate-100 p-5 rounded-md max-w-[550px] w-full mx-auto'>
         <h2 className='text-2xl text-center font-semibold'>Add A Task</h2>
-        <div>
+        <div className='mt-10'>
             <form action="">
                 <div className='flex flex-col mb-3'>
                     <label className='font-semibold'>Title</label>
@@ -65,12 +80,18 @@ const TaskAddForm = () => {
                 </div>
                 <div className='flex flex-col mb-10'>
                     <label className='font-semibold'>Description</label>
-                    <textarea type="text" name="description" placeholder='Description' value={formData.description} onChange={handleInputChange} className={`bg-white rounded-md px-4 py-2 text-gray-500 text-sm border border-gray-200 outline-blue-500 ${errors.description && 'border-red-500'}`} />
+                    <textarea type="text" name="description" placeholder='Description' value={formData.description} onChange={handleInputChange} className={`bg-white min-h-36 rounded-md px-4 py-2 text-gray-500 text-sm border border-gray-200 outline-blue-500 ${errors.description && 'border-red-500'}`} />
                     {errors.description && 
                         <p className='text-red-500 text-xs'>{errors.description}</p>
                     }
                 </div>
-                <button type="button" onClick={handleSubmit} className='bg-blue-500 w-36 py-2 rounded-md text-white font-semibold text-sm shadow-md cursor-pointer hover:bg-blue-600 transition-all transform hover:-translate-y-1 duration-150 float-right'>Submit</button>
+                <button type="button" onClick={() => handleSubmit()} className='bg-blue-500 w-36 py-2 rounded-md text-white text-center font-semibold text-sm shadow-md cursor-pointer hover:bg-blue-600 transition-all transform hover:-translate-y-1 duration-150 float-right'>
+                    {addingTask ? (
+                        <BiLoader className='animate-spin mx-auto' size={18} />
+                    ) : (
+                        'Submit'
+                    )}
+                </button>
             </form>
         </div>
     </div>
