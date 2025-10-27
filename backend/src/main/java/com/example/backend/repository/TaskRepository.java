@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     // Get top 5 not completed tasks
-    List<Task> findTop5TasksByCompletedFalseOrderByIdDesc();
+    List<Task> findTop5ByCompletedFalseOrderByIdDesc();
 }

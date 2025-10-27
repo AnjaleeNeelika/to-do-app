@@ -5,6 +5,7 @@ import com.example.backend.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public class TaskService {
     }
 
     public List<Task> getRecentIncompleteTasks() {
-        return taskRepository.findTop5TasksByCompletedFalseOrderByIdDesc();
+        return taskRepository.findTop5ByCompletedFalseOrderByIdDesc();
     }
 
     public Optional<Task> getTaskById(Long id) {
@@ -27,6 +28,7 @@ public class TaskService {
 
     public Task createTask(Task task) {
         task.setCompleted(false);
+        task.setCreatedAt(new Date());
         return taskRepository.save(task);
     }
 
